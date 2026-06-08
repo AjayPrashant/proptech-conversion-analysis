@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proptech Conversion Friction — Product Analysis</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --bg:       #0a0e13;
+  --s1:       #111820;
+  --s2:       #19222d;
+  --s3:       #212d3a;
+  --border:   #253040;
+  --border2:  #2e3d50;
+  --text:     #cdd8e3;
+  --muted:    #6b8099;
+  --dim:      #3d5166;
+  --green:    #4ade80;
+  --green2:   #166534;
+  --greenb:   #14532d;
+  --coral:    #f87171;
+  --coralb:   #450a0a;
+  --amber:    #fbbf24;
+  --amberb:   #451a03;
+  --blue:     #60a5fa;
+  --blueb:    #1e3a5f;
+  --purple:   #c084fc;
+  --white:    #f0f6fc;
+  --font:     -apple-system, 'SF Pro Text', 'Segoe UI', sans-serif;
+  --mono:     'SF Mono', 'Fira Code', monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{background:var(--bg);}
+body{font-family:var(--font);color:var(--text);font-size:13px;line-height:1.5;background:var(--bg);}
+
+.page{max-width:1080px;margin:0 auto;padding:40px 24px 80px;}
+
+/* ── MASTHEAD ── */
+.masthead{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;padding-bottom:24px;border-bottom:1px solid var(--border);}
+.mast-left{}
+.mast-eyebrow{font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;}
+.mast-title{font-size:26px;font-weight:600;color:var(--white);line-height:1.2;margin-bottom:4px;}
+.mast-sub{font-size:12px;color:var(--muted);}
+.mast-pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;}
+.pill{background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:3px 12px;font-size:11px;color:var(--muted);}
+.pill span{color:var(--text);}
+.mast-right{text-align:right;}
+.analyst-name{font-size:11px;color:var(--muted);margin-bottom:4px;}
+.analyst-role{font-size:13px;color:var(--white);font-weight:500;}
+
+/* ── FINDING CARD ── */
+.finding-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:32px;}
+.finding-main{grid-column:1/3;background:var(--s1);border:1px solid var(--border);border-left:3px solid var(--green);padding:20px 24px;border-radius:0 8px 8px 0;}
+.finding-tag{font-size:10px;color:var(--green);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;}
+.finding-headline{font-size:17px;color:var(--white);font-weight:600;line-height:1.3;margin-bottom:8px;}
+.finding-body{font-size:12px;color:var(--muted);line-height:1.6;}
+.finding-body strong{color:var(--text);}
+.finding-stats{display:flex;flex-direction:column;gap:12px;}
+.fstat{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:14px 18px;}
+.fstat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+.fstat-num{font-size:24px;font-weight:600;line-height:1;}
+.fstat-note{font-size:11px;color:var(--muted);margin-top:3px;}
+.fstat.alert .fstat-num{color:var(--coral);}
+.fstat.goal .fstat-num{color:var(--amber);}
+
+/* ── SECTIONS ── */
+.section{margin-bottom:36px;}
+.sec-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.sec-num{font-size:10px;color:var(--green);font-weight:600;letter-spacing:.08em;font-family:var(--mono);}
+.sec-title{font-size:14px;color:var(--white);font-weight:500;}
+.sec-sub{font-size:11px;color:var(--muted);margin-left:auto;}
+
+/* ── CARDS ── */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:18px 20px;}
+.card-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.grid3{display:grid;grid-template-columns:3fr 2fr;gap:12px;}
+
+/* ── FUNNEL TABLE ── */
+.ftable{width:100%;border-collapse:collapse;}
+.ftable th{font-size:10px;color:var(--muted);text-align:left;padding:0 8px 10px;text-transform:uppercase;letter-spacing:.07em;}
+.ftable th:last-child{text-align:right;}
+.ftable td{padding:7px 8px;border-top:1px solid var(--border);font-size:12px;vertical-align:middle;}
+.ftable tr:hover td{background:var(--s2);}
+.stage-label{color:var(--white);font-weight:500;}
+.bar-wrap{height:6px;background:var(--s3);border-radius:3px;width:180px;display:inline-block;vertical-align:middle;}
+.bar-fill{height:6px;border-radius:3px;}
+.tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:4px;font-weight:500;}
+.tag-high{background:rgba(248,113,113,.15);color:var(--coral);}
+.tag-med{background:rgba(251,191,36,.12);color:var(--amber);}
+.tag-low{background:rgba(74,222,128,.10);color:var(--green);}
+
+/* ── TOGGLE ── */
+.toggle-row{display:flex;gap:8px;margin-bottom:14px;}
+.tbtn{background:var(--s2);border:1px solid var(--border);color:var(--muted);padding:5px 14px;border-radius:20px;cursor:pointer;font-size:12px;font-family:var(--font);transition:all .15s;}
+.tbtn.on{border-color:var(--blue);color:var(--blue);background:var(--s1);}
+.tbtn:hover:not(.on){border-color:var(--dim);color:var(--text);}
+
+/* ── DOC INSIGHT ── */
+.doc-insight{display:flex;gap:0;margin-top:14px;}
+.di-block{flex:1;text-align:center;padding:14px 8px;border-right:1px solid var(--border);}
+.di-block:last-child{border-right:none;}
+.di-num{font-size:22px;font-weight:600;line-height:1;margin-bottom:4px;}
+.di-label{font-size:10px;color:var(--muted);line-height:1.4;}
+.di-arrow{display:flex;align-items:center;color:var(--dim);font-size:18px;padding:0 4px;}
+.insight-banner{margin-top:14px;padding:10px 14px;background:rgba(74,222,128,.07);border:1px solid rgba(74,222,128,.18);border-radius:6px;font-size:12px;color:var(--green);line-height:1.5;}
+
+/* ── PSYCH CARDS ── */
+.psych-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.pcard{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
+.ptag{font-size:9px;color:var(--purple);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;background:rgba(192,132,252,.1);display:inline-block;padding:2px 8px;border-radius:4px;}
+.ptitle{font-size:12px;color:var(--white);font-weight:500;margin-bottom:5px;}
+.pbody{font-size:11px;color:var(--muted);line-height:1.6;}
+
+/* ── RECOMMENDATION ── */
+.rec-main{background:var(--s1);border:1px solid var(--border);border-top:3px solid var(--green);border-radius:0 0 8px 8px;padding:20px 22px;margin-bottom:12px;}
+.rec-phase{font-size:10px;color:var(--green);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;}
+.rec-title{font-size:15px;color:var(--white);font-weight:500;margin-bottom:8px;}
+.rec-body{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;}
+.rec-items{display:flex;flex-direction:column;gap:6px;}
+.rec-row{display:flex;gap:10px;font-size:12px;color:var(--text);}
+.rec-dot{width:5px;height:5px;border-radius:50%;background:var(--green);margin-top:5px;flex-shrink:0;}
+.rec-dot.blocked{background:var(--coral);}
+.rec-phases{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.phase-card{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
+.phase-tag{font-size:9px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;display:inline-block;padding:2px 8px;border-radius:4px;}
+.phase-now{background:rgba(74,222,128,.1);color:var(--green);}
+.phase-q2{background:rgba(96,165,250,.1);color:var(--blue);}
+.phase-title{font-size:12px;color:var(--white);font-weight:500;margin-bottom:5px;}
+.phase-body{font-size:11px;color:var(--muted);line-height:1.5;}
+
+/* ── AB TEST ── */
+.ab-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.ab-card{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:16px 18px;}
+.ab-card.control{border-top:3px solid var(--dim);}
+.ab-card.treatment{border-top:3px solid var(--green);}
+.ab-type{font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;}
+.ab-type.c{color:var(--muted);}
+.ab-type.t{color:var(--green);}
+.ab-title{font-size:13px;color:var(--white);font-weight:500;margin-bottom:6px;}
+.ab-desc{font-size:11px;color:var(--muted);line-height:1.5;margin-bottom:10px;}
+.metric-list{display:flex;flex-direction:column;gap:5px;}
+.metric-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px;}
+.metric-row:last-child{border-bottom:none;}
+.metric-name{color:var(--muted);}
+.mtag{font-size:9px;padding:2px 7px;border-radius:4px;}
+.mt-primary{background:rgba(96,165,250,.12);color:var(--blue);}
+.mt-secondary{background:rgba(251,191,36,.10);color:var(--amber);}
+.mt-guard{background:rgba(248,113,113,.10);color:var(--coral);}
+.sample-box{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:14px 18px;}
+.sample-row{display:flex;gap:28px;flex-wrap:wrap;margin-bottom:10px;}
+.sitem{display:flex;flex-direction:column;gap:3px;}
+.snum{font-size:20px;color:var(--white);font-weight:600;}
+.slbl{font-size:10px;color:var(--muted);}
+.sample-note{font-size:11px;color:var(--muted);line-height:1.5;}
+
+/* ── FOOTER ── */
+.footer-strip{background:var(--s1);border:1px solid var(--green);border-radius:8px;padding:22px 26px;margin-top:40px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;}
+.footer-quote{font-size:13px;color:var(--text);font-style:italic;max-width:440px;line-height:1.6;}
+.footer-nums{display:flex;gap:24px;}
+.fnum-block{text-align:center;}
+.fnum{font-size:22px;font-weight:600;}
+.fnum.g{color:var(--green);}
+.fnum.a{color:var(--amber);}
+.fnum.b{color:var(--blue);}
+.fnumlbl{font-size:10px;color:var(--muted);margin-top:2px;}
+.disclaimer{margin-top:24px;font-size:11px;color:var(--dim);line-height:1.6;border-top:1px solid var(--border);padding-top:16px;}
+
+/* ── LEGEND ── */
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);}
+.leg-dot{width:10px;height:2px;border-radius:1px;}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- MASTHEAD -->
+<div class="masthead">
+  <div class="mast-left">
+    <div class="mast-eyebrow">Product Data Analysis · Tokenised Real Estate · UAE</div>
+    <div class="mast-title">Conversion Friction<br>in the Investor Funnel</div>
+    <div class="mast-sub">Where are investors dropping off — and why?</div>
+    <div class="mast-pills">
+      <div class="pill">Period: <span>Oct 2024 – Mar 2025</span></div>
+      <div class="pill">Users: <span>3,000</span></div>
+      <div class="pill">Events: <span>16,026</span></div>
+      <div class="pill">Platform: <span>Tokenised RE Investment</span></div>
+    </div>
+  </div>
+  <div class="mast-right">
+    <div class="analyst-name">Prepared by</div>
+    <div class="analyst-role">Ajay</div>
+    <div class="analyst-name" style="margin-top:4px;">Product Data Analyst (candidate)</div>
+  </div>
+</div>
+
+<!-- FINDING STRIP -->
+<div class="finding-strip">
+  <div class="finding-main">
+    <div class="finding-tag">Key finding — visible in 10 seconds</div>
+    <div class="finding-headline">Document engagement produces a 27× conversion lift.<br>The bottleneck is activation, not content.</div>
+    <div class="finding-body">
+      <strong>44% of users drop off before opening a single document.</strong> Those who do engage convert at 5.5% vs 0.2% for those who don't. All document types perform similarly once opened — meaning the problem isn't <em>which</em> document users see, it's that most users never open any. The intervention is information architecture, not AI.
+    </div>
+  </div>
+  <div class="finding-stats">
+    <div class="fstat alert">
+      <div class="fstat-label">Biggest drop-off</div>
+      <div class="fstat-num">44%</div>
+      <div class="fstat-note">Listing Detail → Doc stage</div>
+    </div>
+    <div class="fstat goal">
+      <div class="fstat-label">Overall conversion</div>
+      <div class="fstat-num">2.7%</div>
+      <div class="fstat-note">Target: 3.0% by Q3</div>
+    </div>
+  </div>
+</div>
+
+<!-- 01 FUNNEL -->
+<div class="section">
+  <div class="sec-header">
+    <div class="sec-num">01</div>
+    <div class="sec-title">Funnel — where the leak is</div>
+    <div class="sec-sub">Toggle segment below</div>
+  </div>
+  <div class="card">
+    <div class="toggle-row">
+      <button class="tbtn on" onclick="switchFunnel('all',this)">All users</button>
+      <button class="tbtn" onclick="switchFunnel('firsttime',this)">First-time</button>
+      <button class="tbtn" onclick="switchFunnel('returning',this)">Returning</button>
+      <button class="tbtn" onclick="switchFunnel('mobile',this)">Mobile</button>
+      <button class="tbtn" onclick="switchFunnel('desktop',this)">Desktop</button>
+    </div>
+    <table class="ftable" id="funnel-table">
+      <thead>
+        <tr>
+          <th style="width:200px;">Stage</th>
+          <th style="width:70px;text-align:right;">Users</th>
+          <th style="width:60px;text-align:right;">of entry</th>
+          <th style="width:200px;padding-left:12px;">Volume</th>
+          <th style="text-align:right;">Drop to next</th>
+        </tr>
+      </thead>
+      <tbody id="funnel-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 02 SEGMENTS -->
+<div class="section">
+  <div class="sec-header">
+    <div class="sec-num">02</div>
+    <div class="sec-title">Segments — who drops off hardest</div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-label">By investor type</div>
+      <div style="position:relative;height:220px;">
+        <canvas id="segTypeChart" role="img" aria-label="Line chart comparing funnel conversion for first-time vs returning investors across 8 stages">Returning investors convert at 7.4% vs 0.5% for first-timers</canvas>
+      </div>
+      <div class="legend" id="leg-type"></div>
+    </div>
+    <div class="card">
+      <div class="card-label">By device type</div>
+      <div style="position:relative;height:220px;">
+        <canvas id="segDevChart" role="img" aria-label="Line chart comparing funnel conversion for mobile vs desktop users across 8 stages">Desktop converts at 4.5% vs 1.8% for mobile</canvas>
+      </div>
+      <div class="legend" id="leg-dev"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 03 DOC ENGAGEMENT -->
+<div class="section">
+  <div class="sec-header">
+    <div class="sec-num">03</div>
+    <div class="sec-title">Document engagement — depth drives conversion</div>
+  </div>
+  <div class="grid3">
+    <div class="card">
+      <div class="card-label">Documents opened vs conversion rate</div>
+      <div style="position:relative;height:200px;">
+        <canvas id="docsChart" role="img" aria-label="Bar chart: conversion rate rises from 0.2% at 0 docs to 9.4% at 4+ docs">Conversion rises steeply with number of documents opened</canvas>
+      </div>
+      <div class="insight-banner">
+        Document engagement depth is a <strong>47× predictor</strong> of conversion (0.2% → 9.4%). All doc types perform within 0.8pp of each other — the bottleneck is opening a first document, not which document.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-label">Opener vs non-opener impact</div>
+      <div class="doc-insight">
+        <div class="di-block">
+          <div class="di-num" style="color:var(--coral);">0.2%</div>
+          <div class="di-label">No docs opened</div>
+        </div>
+        <div class="di-arrow">→</div>
+        <div class="di-block">
+          <div class="di-num" style="color:var(--blue);">5.5%</div>
+          <div class="di-label">Opened ≥1 doc</div>
+        </div>
+        <div class="di-arrow">→</div>
+        <div class="di-block">
+          <div class="di-num" style="color:var(--green);">9.4%</div>
+          <div class="di-label">Opened 4+ docs</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;">
+        <div class="card-label">Conversion by doc type (sessions)</div>
+        <div style="position:relative;height:140px;margin-top:8px;">
+          <canvas id="docTypeChart" role="img" aria-label="Horizontal bars showing similar conversion rates across all document types from 6.7 to 7.5 percent">All document types convert within a narrow 0.8 percentage point range</canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 04 PSYCHOLOGY -->
+<div class="section">
+  <div class="sec-header">
+    <div class="sec-num">04</div>
+    <div class="sec-title">Customer psychology — why they don't open</div>
+  </div>
+  <div class="psych-grid">
+    <div class="pcard">
+      <div class="ptag">Overchoice effect</div>
+      <div class="ptitle">Analysis paralysis</div>
+      <div class="pbody">7–9 documents presented with equal visual weight. When inputs are indistinguishable in importance, investors defer rather than choose the wrong starting point. Deferral equals abandonment.</div>
+    </div>
+    <div class="pcard">
+      <div class="ptag">Dunning-Kruger exit</div>
+      <div class="ptitle">Competence gap shock</div>
+      <div class="pbody">First-timers arrive believing they can evaluate investment documents. A 40-page Investment Memorandum immediately reveals the gap. They exit — not from disinterest, but from rational self-assessment.</div>
+    </div>
+    <div class="pcard">
+      <div class="ptag">Trust architecture</div>
+      <div class="ptitle">The document paradox</div>
+      <div class="pbody">Documents simultaneously signal legitimacy and create overwhelm. Returning investors use them as confirmation. First-timers need them as foundation — but the format was built for the wrong audience.</div>
+    </div>
+    <div class="pcard">
+      <div class="ptag">Context mismatch</div>
+      <div class="ptitle">Mobile PDF problem</div>
+      <div class="pbody">59% of users are mobile. PDFs require active zoom and scroll — high-effort interaction that raises cognitive load, triggers doubt, and accelerates exit. The experience was designed for desktop and used on mobile.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 05 RECOMMENDATION -->
+<div class="section">
+  <div class="sec-header">
+    <div class="sec-num">05</div>
+    <div class="sec-title">Recommendation — reduce activation energy</div>
+  </div>
+  <div class="rec-main">
+    <div class="rec-phase">Phase 1 — Now · Zero compliance risk · No legal review required</div>
+    <div class="rec-title">Guided document hierarchy</div>
+    <div class="rec-body">Reorder, label, and contextualise the document list so investors know where to start. No financial summaries generated, no AI involved — metadata-only labels on existing documents. Can ship within a single sprint.</div>
+    <div class="rec-items">
+      <div class="rec-row"><div class="rec-dot"></div><div>Surface one document first with a clear "Start Here" prompt — the data shows any first document opens the conversion pathway, not a specific one</div></div>
+      <div class="rec-row"><div class="rec-dot"></div><div>Add a one-line plain-English label to each document: "What is this file?" — not a summary, just context</div></div>
+      <div class="rec-row"><div class="rec-dot"></div><div>Mobile-optimised reading mode — chunked, scrollable, no PDF viewer dependency for mobile users (59% of traffic)</div></div>
+      <div class="rec-row"><div class="rec-dot"></div><div>"Key Numbers" card using 4–5 structured fields already in the database (yield, ROI, occupancy assumption, exit timeline)</div></div>
+    </div>
+  </div>
+  <div class="rec-phases">
+    <div class="phase-card">
+      <div class="phase-tag phase-q2">Phase 2 — Q2 · Requires data pipeline</div>
+      <div class="phase-title">Structured data layer</div>
+      <div class="phase-body">Extract key metrics from documents into structured fields. Enables cross-listing comparison, yield calculator with investor's own capital input. No compliance exposure — structured data only.</div>
+    </div>
+    <div class="phase-card">
+      <div class="phase-tag" style="background:rgba(192,132,252,.1);color:var(--purple);">Phase 3 — Q3+ · Compliance review required</div>
+      <div class="phase-title">AI document Q&amp;A</div>
+      <div class="phase-body">Plain-language investor questions answered by AI trained on document content. Highest potential impact. Requires legal sign-off on response boundaries and disclaimers before any build begins.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 06 AB TEST -->
+<div class="section">
+  <div class="sec-header">
+    <div class="sec-num">06</div>
+    <div class="sec-title">A/B test design</div>
+  </div>
+  <div class="card" style="margin-bottom:12px;border-left:2px solid var(--blue);border-radius:0 8px 8px 0;">
+    <div class="card-label">Hypothesis</div>
+    <div style="font-size:13px;color:var(--text);line-height:1.6;">
+      Users shown a Guided Document Hierarchy — one document surfaced first with a "Start Here" prompt, plus plain-English labels — will convert from Document Engagement to Investment Completed at a meaningfully higher rate than users shown the current flat list.
+    </div>
+  </div>
+  <div class="ab-grid">
+    <div class="ab-card control">
+      <div class="ab-type c">Control — 50%</div>
+      <div class="ab-title">Current state</div>
+      <div class="ab-desc">Flat document list, alphabetical or upload order. 7–9 items, equal visual weight, no labels. No mobile optimisation.</div>
+      <div class="metric-list">
+        <div class="metric-row"><span class="metric-name">Doc → investment conversion rate</span><span class="mtag mt-primary">Primary</span></div>
+        <div class="metric-row"><span class="metric-name">First doc open rate</span><span class="mtag mt-secondary">Secondary</span></div>
+        <div class="metric-row"><span class="metric-name">Avg docs opened per session</span><span class="mtag mt-secondary">Secondary</span></div>
+        <div class="metric-row"><span class="metric-name">Support tickets re: doc confusion</span><span class="mtag mt-guard">Guardrail</span></div>
+        <div class="metric-row"><span class="metric-name">Compliance flags</span><span class="mtag mt-guard">Guardrail</span></div>
+      </div>
+    </div>
+    <div class="ab-card treatment">
+      <div class="ab-type t">Variant — 50%</div>
+      <div class="ab-title">Guided hierarchy</div>
+      <div class="ab-desc">One document pinned first with "Start Here". Plain-English label on each doc. Mobile-optimised reader for top document.</div>
+      <div class="metric-list">
+        <div class="metric-row"><span class="metric-name">Doc → investment conversion rate</span><span class="mtag mt-primary">Primary</span></div>
+        <div class="metric-row"><span class="metric-name">First doc open rate</span><span class="mtag mt-secondary">Secondary</span></div>
+        <div class="metric-row"><span class="metric-name">Avg docs opened per session</span><span class="mtag mt-secondary">Secondary</span></div>
+        <div class="metric-row"><span class="metric-name">Avg investment per converted user</span><span class="mtag mt-guard">Guardrail</span></div>
+        <div class="metric-row"><span class="metric-name">Compliance flags</span><span class="mtag mt-guard">Guardrail</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="sample-box">
+    <div class="card-label" style="margin-bottom:12px;">Sample size calculation — two-proportion z-test (α = 0.05, power = 80%)</div>
+    <div class="sample-row">
+      <div class="sitem"><div class="snum">6.0%</div><div class="slbl">Baseline conversion rate</div></div>
+      <div class="sitem"><div class="snum">+2.5pp</div><div class="slbl">Min detectable effect</div></div>
+      <div class="sitem"><div class="snum">~1,900</div><div class="slbl">Users per variant</div></div>
+      <div class="sitem"><div class="snum">~8 wks</div><div class="slbl">Estimated runtime</div></div>
+    </div>
+    <div class="sample-note">Segment results by: first-time vs returning · mobile vs desktop · high-yield (&gt;9% annualised ROI) vs standard listings. Report per-segment lift — not aggregate only. A result that works for returning desktop users but not first-time mobile users is not a win.</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer-strip">
+  <div class="footer-quote">"The fix is not AI. It is information architecture — reducing the activation energy needed to open a first document."</div>
+  <div class="footer-nums">
+    <div class="fnum-block"><div class="fnum g">27×</div><div class="fnumlbl">lift for doc openers</div></div>
+    <div class="fnum-block"><div class="fnum a">44%</div><div class="fnumlbl">drop-off at doc stage</div></div>
+    <div class="fnum-block"><div class="fnum b">+2.5pp</div><div class="fnumlbl">target improvement</div></div>
+  </div>
+</div>
+
+<div class="disclaimer">
+  Dataset is simulated with realistic MENA proptech behavioural distributions — 3,000 users, 16,026 events, Oct 2024–Mar 2025. Methodology is production-applicable. Full analysis with statistical significance testing available in the accompanying Jupyter notebook.
+</div>
+
+</div>
+
+<script>
+const STAGES = ["Homepage","Listing Browse","Listing Detail View","Document Engagement","KYC Initiation","Token Selection","Payment Initiated","Investment Completed"];
+const SHORT   = ["Homepage","Listing Browse","Detail View","Doc Engagement","KYC Init","Token Select","Payment","Invested"];
+
+const SEG = {
+  all:       [3000,2728,2034,1140,707,423,213,82],
+  firsttime: [2028,1815,1321,608,269,88,29,10],
+  returning: [972,913,713,532,438,335,184,72],
+  mobile:    [1764,1610,1198,584,341,213,107,31],
+  desktop:   [997,911,688,456,296,170,88,45]
+};
+
+const DROPOFF = {
+  all:       [9.1,25.4,44.0,38.0,40.2,49.6,61.5],
+  firsttime: [10.5,27.2,54.0,55.8,67.3,67.0,65.5],
+  returning: [6.1,21.9,25.4,17.7,23.5,45.1,60.9],
+  mobile:    [8.7,25.6,51.2,41.6,37.5,49.8,71.0],
+  desktop:   [8.6,24.5,33.7,35.1,42.6,48.2,48.9]
+};
+
+function buildFunnel(key) {
+  const counts  = SEG[key];
+  const dropoff = DROPOFF[key];
+  const base    = counts[0];
+  const tbody   = document.getElementById('funnel-tbody');
+  tbody.innerHTML = '';
+  STAGES.forEach((s, i) => {
+    const pct  = (counts[i] / base * 100).toFixed(1);
+    const bw   = Math.round(counts[i] / base * 180);
+    const drop = i < dropoff.length ? dropoff[i] : null;
+    let tc='', badge='—';
+    if (drop !== null) {
+      tc   = drop > 40 ? 'tag-high' : drop > 25 ? 'tag-med' : 'tag-low';
+      badge= `${drop}% drop`;
+    }
+    const isKey = s === 'Document Engagement';
+    const bc    = drop > 40 ? '#f87171' : drop > 25 ? '#fbbf24' : '#4ade80';
+    tbody.innerHTML += `<tr>
+      <td class="stage-label" ${isKey ? 'style="color:var(--amber);"' : ''}>${s}${isKey ? ' ⚠' : ''}</td>
+      <td style="text-align:right;color:var(--text);">${counts[i].toLocaleString()}</td>
+      <td style="text-align:right;color:var(--muted);">${pct}%</td>
+      <td style="padding-left:12px;"><div class="bar-wrap"><div class="bar-fill" style="width:${bw}px;background:${bc};opacity:.7;"></div></div></td>
+      <td style="text-align:right;">${drop !== null ? `<span class="tag ${tc}">${badge}</span>` : '—'}</td>
+    </tr>`;
+  });
+}
+buildFunnel('all');
+
+function switchFunnel(key, btn) {
+  document.querySelectorAll('.tbtn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  buildFunnel(key);
+}
+
+// Segment line charts
+function makeSegChart(id, labels, colors, data, legendId) {
+  const datasets = labels.map((lbl, i) => ({
+    label: lbl,
+    data: data[i].map((v, j) => parseFloat((v / data[i][0] * 100).toFixed(1))),
+    borderColor: colors[i],
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    pointRadius: 3,
+    tension: 0.3,
+    borderDash: i === 1 ? [4, 3] : []
+  }));
+  new Chart(document.getElementById(id), {
+    type: 'line',
+    data: { labels: SHORT.map(s => s.length > 12 ? s.slice(0,11)+'…' : s), datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color:'#6b8099', font:{size:9} }, grid: { color:'#19222d' } },
+        y: { ticks: { color:'#6b8099', callback: v => v+'%', font:{size:9} }, grid: { color:'#19222d' }, min: 0 }
+      }
+    }
+  });
+  const leg = document.getElementById(legendId);
+  leg.innerHTML = labels.map((l,i) => `<div class="leg-item"><div class="leg-dot" style="background:${colors[i]};${i===1?'border-top:2px dashed '+colors[i]+';background:transparent;height:0;':''}"></div>${l}</div>`).join('');
+}
+makeSegChart('segTypeChart', ['First-time','Returning'], ['#f87171','#4ade80'], [SEG.firsttime, SEG.returning], 'leg-type');
+makeSegChart('segDevChart',  ['Mobile','Desktop'],       ['#f87171','#60a5fa'], [SEG.mobile,    SEG.desktop],   'leg-dev');
+
+// Docs opened chart
+new Chart(document.getElementById('docsChart'), {
+  type: 'bar',
+  data: {
+    labels: ['0 docs','1 doc','2 docs','3 docs','4+ docs'],
+    datasets: [{
+      data: [0.2, 1.4, 4.0, 5.1, 9.4],
+      backgroundColor: ['rgba(248,113,113,.25)','rgba(96,165,250,.35)','rgba(96,165,250,.55)','rgba(96,165,250,.75)','rgba(74,222,128,.8)'],
+      borderRadius: 4, borderSkipped: false
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color:'#6b8099', font:{size:10} }, grid: { color:'#19222d' } },
+      y: { ticks: { color:'#6b8099', callback: v => v+'%', font:{size:10} }, grid: { color:'#19222d' }, min:0, max:11 }
+    }
+  }
+});
+
+// Doc type chart
+new Chart(document.getElementById('docTypeChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Brochure (unit)','Whitepaper','Investment memo','Projections','Valuation report','Brochure'],
+    datasets: [{
+      data: [7.5, 7.3, 7.1, 7.0, 6.8, 6.7],
+      backgroundColor: 'rgba(96,165,250,.5)',
+      borderRadius: 3, borderSkipped: false
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color:'#6b8099', callback: v => v+'%', font:{size:9} }, grid: { color:'#19222d' }, min:6, max:8 },
+      y: { ticks: { color:'#6b8099', font:{size:9} }, grid: { color:'#19222d' } }
+    }
+  }
+});
+</script>
+</body>
+</html>

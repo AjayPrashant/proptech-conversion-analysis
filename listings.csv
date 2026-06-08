@@ -1,0 +1,31 @@
+listing_id,developer,location,property_type,listing_price,gross_yield,net_yield,annualised_roi,n_documents,funded_pct,days_live,heat_score
+LST001,Sobha,Sobha Hartland,Townhouse,1498000.0,7.92,5.41,9.92,7,67.2,94,0.903
+LST002,Meraas,Al Barsha,Villa,1378000.0,8.73,6.57,12.58,6,87.6,115,1.0
+LST003,Damac,Sobha Hartland,Apartment,3915000.0,9.59,7.13,11.47,9,84.2,65,0.878
+LST004,Sobha,Dubai Hills,Apartment,630000.0,7.4,5.71,9.01,4,62.3,120,0.867
+LST005,Sobha,Downtown Dubai,Studio,1994000.0,6.69,4.97,9.35,9,85.4,81,1.0
+LST006,Emaar,Dubai Hills,Apartment,3175000.0,11.05,7.43,12.99,9,87.4,15,1.0
+LST007,Emaar,Sobha Hartland,Apartment,1808000.0,11.12,7.42,14.2,7,44.1,105,1.0
+LST008,Nakheel,Al Barsha,Townhouse,1605000.0,11.34,7.56,14.44,9,63.3,12,1.0
+LST009,Sobha,DIFC,Villa,3638000.0,6.29,4.42,9.95,4,38.3,42,1.0
+LST010,Meraas,Sobha Hartland,Apartment,4204000.0,6.54,4.68,8.48,5,89.2,20,0.634
+LST011,Emaar,Dubai Marina,Villa,2555000.0,10.65,6.99,13.05,5,56.4,48,1.0
+LST012,Meraas,JVT,Apartment,3773000.0,10.43,7.97,12.93,6,80.5,56,1.0
+LST013,Damac,JVC,Apartment,3148000.0,10.12,7.48,12.2,6,45.3,108,0.99
+LST014,Emaar,JVT,Townhouse,1756000.0,9.77,6.89,13.05,6,34.9,42,1.0
+LST015,Damac,Al Barsha,Apartment,2680000.0,10.94,7.52,14.63,9,87.8,25,1.0
+LST016,Meraas,DIFC,Villa,3965000.0,7.19,5.08,10.39,7,53.6,30,1.0
+LST017,Sobha,Palm Jumeirah,Townhouse,4362000.0,7.57,5.58,10.74,9,48.3,58,1.0
+LST018,Damac,JVC,Villa,2192000.0,9.96,6.48,13.63,8,67.2,5,1.0
+LST019,Nakheel,Sobha Hartland,Studio,2593000.0,8.63,5.91,12.5,9,59.2,76,1.0
+LST020,Sobha,DIFC,Townhouse,3599000.0,8.69,6.78,11.74,6,35.3,9,1.0
+LST021,Meraas,Business Bay,Villa,4386000.0,11.27,7.61,13.81,4,99.4,106,1.0
+LST022,Sobha,Palm Jumeirah,Townhouse,2397000.0,7.87,6.04,11.34,9,79.1,58,1.0
+LST023,Damac,Business Bay,Apartment,1576000.0,8.87,6.74,12.16,9,56.8,110,1.0
+LST024,Nakheel,DIFC,Villa,4082000.0,10.98,8.54,14.98,8,46.8,63,1.0
+LST025,Emaar,Al Barsha,Villa,881000.0,8.64,6.21,10.43,9,30.8,45,0.988
+LST026,Nakheel,DIFC,Apartment,4188000.0,7.98,5.54,9.89,5,68.9,42,0.963
+LST027,Sobha,JVT,Apartment,1495000.0,6.45,4.34,9.05,6,76.0,14,0.824
+LST028,Damac,Dubai Hills,Villa,1277000.0,8.86,6.7,10.86,4,82.0,19,1.0
+LST029,Emaar,Sobha Hartland,Townhouse,2727000.0,9.85,7.23,13.41,5,54.8,105,1.0
+LST030,Emaar,DIFC,Townhouse,1228000.0,9.8,7.4,12.84,7,43.2,27,1.0
